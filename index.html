@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRAFT — Freelance Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0e0d0b;
+    --paper: #f5f0e8;
+    --cream: #ede7d9;
+    --rust: #c44b2b;
+    --rust-light: #e05c3a;
+    --gold: #b8913a;
+    --muted: #7a7060;
+    --border: rgba(14,13,11,0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    background: rgba(245,240,232,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--rust); }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+    align-items: center;
+  }
+
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  .nav-cta {
+    background: var(--ink) !important;
+    color: var(--paper) !important;
+    padding: 0.6rem 1.4rem;
+    border-radius: 2px;
+    transition: background 0.2s !important;
+  }
+
+  .nav-cta:hover { background: var(--rust) !important; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    padding: 6rem 3rem 4rem 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 2rem;
+    height: 1px;
+    background: var(--rust);
+  }
+
+  .hero-h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.2rem, 5.5vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-bottom: 1.8rem;
+  }
+
+  .hero-h1 em {
+    font-style: italic;
+    color: var(--rust);
+  }
+
+  .hero-desc {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--muted);
+    max-width: 38ch;
+    margin-bottom: 2.8rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--rust);
+    color: #fff;
+    padding: 1rem 2.2rem;
+    border: none;
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn-primary:hover { background: var(--rust-light); transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    padding: 1rem 2.2rem;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .btn-secondary:hover { background: var(--ink); color: var(--paper); }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 4rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    display: block;
+  }
+
+  .hero-right {
+    position: relative;
+    background: var(--cream);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-right::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 59px,
+      var(--border) 59px,
+      var(--border) 60px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 59px,
+      var(--border) 59px,
+      var(--border) 60px
+    );
+  }
+
+  .hero-card-stack {
+    position: relative;
+    width: 340px;
+    height: 420px;
+    z-index: 2;
+  }
+
+  .profile-card {
+    position: absolute;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.6rem;
+    box-shadow: 0 8px 40px rgba(14,13,11,0.12);
+    transition: transform 0.3s ease;
+    width: 300px;
+  }
+
+  .profile-card:nth-child(1) { top: 0; left: 0; transform: rotate(-3deg); }
+  .profile-card:nth-child(2) { top: 50px; left: 40px; transform: rotate(1.5deg); z-index: 2; }
+  .profile-card:nth-child(3) { top: 100px; left: 20px; transform: rotate(-1deg); z-index: 3; }
+
+  .hero-card-stack:hover .profile-card:nth-child(1) { transform: rotate(-6deg) translateY(-8px); }
+  .hero-card-stack:hover .profile-card:nth-child(2) { transform: rotate(3deg) translateX(20px); }
+  .hero-card-stack:hover .profile-card:nth-child(3) { transform: rotate(-0.5deg) translateY(4px); }
+
+  .card-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--paper);
+  }
+
+  .card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+  }
+
+  .card-role {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    padding: 0.25rem 0.6rem;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    color: var(--muted);
+  }
+
+  .card-rate {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--rust);
+  }
+
+  .card-rate span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  /* MARQUEE */
+  .marquee-strip {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.9rem 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .marquee-inner {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee 22s linear infinite;
+    gap: 0;
+  }
+
+  .marquee-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 2.5rem;
+    color: var(--paper);
+    opacity: 0.7;
+    display: inline-flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .marquee-item::after {
+    content: '✦';
+    color: var(--rust);
+    opacity: 1;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* CATEGORIES */
+  .categories {
+    padding: 7rem 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3.5rem;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 0.8rem;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .see-all {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .see-all:hover { color: var(--rust); border-color: var(--rust); }
+
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    border: 1.5px solid var(--border);
+  }
+
+  .cat-item {
+    background: var(--paper);
+    padding: 2rem 1.8rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cat-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--rust);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .cat-item:hover { background: var(--cream); }
+  .cat-item:hover::after { transform: scaleX(1); }
+
+  .cat-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .cat-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+
+  .cat-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  /* HOW IT WORKS */
+  .how-it-works {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 7rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .how-it-works::before {
+    content: 'CRAFT';
+    position: absolute;
+    font-family: 'Playfair Display', serif;
+    font-size: 20vw;
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .how-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .how-it-works .section-label { color: var(--rust); }
+  .how-it-works .section-title { color: var(--paper); }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+    margin-top: 4rem;
+    position: relative;
+  }
+
+  .steps-grid::before {
+    content: '';
+    position: absolute;
+    top: 2.5rem;
+    left: calc(16.666% + 1.5rem);
+    right: calc(16.666% + 1.5rem);
+    height: 1px;
+    background: rgba(245,240,232,0.15);
+  }
+
+  .step {
+    position: relative;
+  }
+
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--rust);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .step-num::after {
+    content: '';
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--rust);
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--paper);
+    margin-bottom: 0.8rem;
+    line-height: 1.25;
+  }
+
+  .step-desc {
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: rgba(245,240,232,0.55);
+  }
+
+  /* FEATURED FREELANCERS */
+  .featured {
+    padding: 7rem 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .freelancer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+
+  .freelancer-card {
+    border: 1px solid var(--border);
+    padding: 2rem;
+    background: var(--paper);
+    transition: box-shadow 0.25s, transform 0.25s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .freelancer-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--rust), var(--gold));
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+
+  .freelancer-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(14,13,11,0.1); }
+  .freelancer-card:hover::before { transform: scaleX(1); }
+
+  .fc-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .fc-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--paper);
+    flex-shrink: 0;
+  }
+
+  .fc-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .fc-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+  }
+
+  .fc-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .stars { color: var(--gold); font-size: 0.8rem; }
+
+  .rating-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .fc-bio {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .fc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .fc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .fc-rate {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .fc-rate span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .hire-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--rust);
+    background: none;
+    border: 1px solid var(--rust);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .hire-btn:hover { background: var(--rust); color: #fff; }
+
+  /* TESTIMONIAL */
+  .testimonial-section {
+    background: var(--cream);
+    padding: 7rem 3rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .testimonial-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .quote-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 6rem;
+    line-height: 0.5;
+    color: var(--rust);
+    opacity: 0.25;
+    display: block;
+    margin-bottom: 2rem;
+  }
+
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-style: italic;
+    line-height: 1.55;
+    color: var(--ink);
+    margin-bottom: 2.5rem;
+  }
+
+  .quote-author {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .quote-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .dot.active { background: var(--rust); }
+
+  /* CTA BANNER */
+  .cta-banner {
+    padding: 7rem 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .cta-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 1rem;
+  }
+
+  .cta-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  .cta-title em { font-style: italic; color: var(--rust); }
+
+  .cta-desc {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .cta-right {
+    background: var(--ink);
+    padding: 3rem;
+    border-radius: 4px;
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-right::before {
+    content: '→';
+    position: absolute;
+    font-family: serif;
+    font-size: 12rem;
+    right: -1rem;
+    bottom: -3rem;
+    opacity: 0.04;
+    color: var(--paper);
+  }
+
+  .signup-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .signup-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: rgba(245,240,232,0.5);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .form-input {
+    background: rgba(245,240,232,0.07);
+    border: 1px solid rgba(245,240,232,0.15);
+    padding: 0.85rem 1rem;
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    border-radius: 2px;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .form-input::placeholder { color: rgba(245,240,232,0.3); }
+  .form-input:focus { border-color: var(--rust); }
+
+  .btn-full {
+    width: 100%;
+    background: var(--rust);
+    color: #fff;
+    padding: 1rem;
+    border: none;
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 0.4rem;
+  }
+
+  .btn-full:hover { background: var(--rust-light); }
+
+  .signup-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: rgba(245,240,232,0.3);
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 4rem 3rem 2rem;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid rgba(245,240,232,0.1);
+    margin-bottom: 2rem;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--paper);
+    margin-bottom: 1rem;
+    display: block;
+    text-decoration: none;
+  }
+
+  .footer-logo span { color: var(--rust); }
+
+  .footer-tagline {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.4);
+    max-width: 28ch;
+  }
+
+  .footer-col-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    margin-bottom: 1.2rem;
+  }
+
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .footer-links a {
+    font-size: 0.88rem;
+    color: rgba(245,240,232,0.55);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--paper); }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: rgba(245,240,232,0.25);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-tag { animation: fadeUp 0.6s ease forwards; }
+  .hero-h1 { animation: fadeUp 0.7s 0.1s ease both; }
+  .hero-desc { animation: fadeUp 0.7s 0.2s ease both; }
+  .hero-actions { animation: fadeUp 0.7s 0.3s ease both; }
+  .hero-stats { animation: fadeUp 0.7s 0.4s ease both; }
+  .hero-right { animation: fadeUp 0.9s 0.2s ease both; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .freelancer-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .steps-grid::before { display: none; }
+    .cta-banner { grid-template-columns: 1fr; gap: 3rem; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://www.upwork.com" target="_blank" class="nav-logo">CRAFT<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="https://www.upwork.com/nx/find-work/" target="_blank">Browse Talent</a></li>
+    <li><a href="https://www.upwork.com/nx/jobs/post/" target="_blank">Post a Job</a></li>
+    <li><a href="https://www.upwork.com/resources/how-upwork-works" target="_blank">How it Works</a></li>
+    <li><a href="https://www.upwork.com/i/pricing/" target="_blank">Pricing</a></li>
+    <li><a href="https://earnwork.netlify.app" target="_blank">My Portfolio</a></li>
+    <li><a href="https://www.upwork.com/nx/signup/" target="_blank" class="nav-cta">Get Started</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">The Freelance Marketplace</div>
+    <h1 class="hero-h1">Find talent<br>that <em>truly</em><br>delivers.</h1>
+    <p class="hero-desc">Connect with the world's finest independent professionals. From brand identity to full-stack engineering — every project, crafted with intention.</p>
+    <div class="hero-actions">
+      <a href="https://www.upwork.com/nx/find-work/" target="_blank" class="btn-primary">Browse Talent</a>
+      <a href="https://earnwork.netlify.app" target="_blank" class="btn-secondary">View My Portfolio</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <span class="stat-num">42k+</span>
+        <span class="stat-label">Vetted Freelancers</span>
+      </div>
+      <div>
+        <span class="stat-num">98%</span>
+        <span class="stat-label">Client Satisfaction</span>
+      </div>
+      <div>
+        <span class="stat-num">$2.4M</span>
+        <span class="stat-label">Paid Out Monthly</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-card-stack">
+      <div class="profile-card">
+        <div class="card-avatar" style="background:#c44b2b;">A</div>
+        <div class="card-name">Amara Osei</div>
+        <div class="card-role">Brand Identity Designer</div>
+        <div class="card-tags">
+          <span class="tag">Branding</span>
+          <span class="tag">Figma</span>
+          <span class="tag">Print</span>
+        </div>
+        <div class="card-rate">$120 <span>/ hr</span></div>
+      </div>
+      <div class="profile-card">
+        <div class="card-avatar" style="background:#2b5c8a;">J</div>
+        <div class="card-name">Jonas Weber</div>
+        <div class="card-role">Full-Stack Engineer</div>
+        <div class="card-tags">
+          <span class="tag">React</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">AWS</span>
+        </div>
+        <div class="card-rate">$145 <span>/ hr</span></div>
+      </div>
+      <div class="profile-card">
+        <div class="card-avatar" style="background:#3a6b4a;">S</div>
+        <div class="card-name">Sofia Martins</div>
+        <div class="card-role">Motion Designer</div>
+        <div class="card-tags">
+          <span class="tag">After Effects</span>
+          <span class="tag">3D</span>
+          <span class="tag">UI Motion</span>
+        </div>
+        <div class="card-rate">$95 <span>/ hr</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span class="marquee-item">Design</span>
+    <span class="marquee-item">Engineering</span>
+    <span class="marquee-item">Copywriting</span>
+    <span class="marquee-item">Strategy</span>
+    <span class="marquee-item">Marketing</span>
+    <span class="marquee-item">Animation</span>
+    <span class="marquee-item">Photography</span>
+    <span class="marquee-item">Consulting</span>
+    <span class="marquee-item">Design</span>
+    <span class="marquee-item">Engineering</span>
+    <span class="marquee-item">Copywriting</span>
+    <span class="marquee-item">Strategy</span>
+    <span class="marquee-item">Marketing</span>
+    <span class="marquee-item">Animation</span>
+    <span class="marquee-item">Photography</span>
+    <span class="marquee-item">Consulting</span>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<section class="categories">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Explore</div>
+      <h2 class="section-title">Browse by<br>discipline</h2>
+    </div>
+    <a href="https://www.upwork.com/nx/find-work/best-matches" target="_blank" class="see-all">View all categories →</a>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-item">
+      <span class="cat-icon">✦</span>
+      <div class="cat-name">Design & Visual</div>
+      <div class="cat-count">8,240 freelancers</div>
+    </div>
+    <div class="cat-item">
+      <span class="cat-icon">⟨/⟩</span>
+      <div class="cat-name">Engineering</div>
+      <div class="cat-count">11,580 freelancers</div>
+    </div>
+    <div class="cat-item">
+      <span class="cat-icon">◎</span>
+      <div class="cat-name">Writing & Copy</div>
+      <div class="cat-count">4,920 freelancers</div>
+    </div>
+    <div class="cat-item">
+      <span class="cat-icon">↗</span>
+      <div class="cat-name">Marketing</div>
+      <div class="cat-count">6,150 freelancers</div>
+    </div>
+    <div class="cat-item">
+      <span class="cat-icon">▷</span>
+      <div class="cat-name">Video & Motion</div>
+      <div class="cat-count">3,400 freelancers</div>
+    </div>
+    <div class="cat-item">
+      <span class="cat-icon">⬡</span>
+      <div class="cat-name">Strategy</div>
+      <div class="cat-count">2,810 freelancers</div>
+    </div>
+    <div class="cat-item">
+      <span class="cat-icon">◈</span>
+      <div class="cat-name">Finance & Legal</div>
+      <div class="cat-count">1,970 freelancers</div>
+    </div>
+    <div class="cat-item">
+      <span class="cat-icon">⊕</span>
+      <div class="cat-name">Data & AI</div>
+      <div class="cat-count">5,330 freelancers</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+  <div class="how-inner">
+    <div class="section-label">Process</div>
+    <h2 class="section-title">From brief to brilliant,<br>in three steps.</h2>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3 class="step-title">Post your project or browse profiles</h3>
+        <p class="step-desc">Describe what you need — or explore curated freelancer profiles filtered by skill, availability, and budget range.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3 class="step-title">Review proposals & connect</h3>
+        <p class="step-desc">Receive tailored proposals within hours. Chat, share briefs, and choose the professional who fits your vision and timeline.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3 class="step-title">Collaborate & pay securely</h3>
+        <p class="step-desc">Work together with built-in milestones. Payment is held in escrow and released only when you're completely satisfied.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED FREELANCERS -->
+<section class="featured">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Featured</div>
+      <h2 class="section-title">Top talent,<br>ready to hire</h2>
+    </div>
+    <a href="https://www.upwork.com/search/profiles/" target="_blank" class="see-all">Browse all →</a>
+  </div>
+  <div class="freelancer-grid">
+    <div class="freelancer-card">
+      <div class="fc-header">
+        <div class="fc-avatar" style="background:#c44b2b;">L</div>
+        <div>
+          <div class="fc-name">Lena Hoffmann</div>
+          <div class="fc-title">UI/UX Designer</div>
+        </div>
+      </div>
+      <div class="fc-rating">
+        <span class="stars">★★★★★</span>
+        <span class="rating-num">5.0 (142 reviews)</span>
+      </div>
+      <p class="fc-bio">Crafting digital products that are as intuitive as they are beautiful. Specializing in SaaS dashboards and mobile apps.</p>
+      <div class="fc-tags">
+        <span class="tag">Figma</span>
+        <span class="tag">Prototyping</span>
+        <span class="tag">Design Systems</span>
+        <span class="tag">User Research</span>
+      </div>
+      <div class="fc-footer">
+        <div class="fc-rate">$135 <span>/ hr</span></div>
+        <button class="hire-btn" onclick="window.open('https://www.upwork.com/search/profiles/?q=UI+UX+designer','_blank')">View Profile</button>
+      </div>
+    </div>
+    <div class="freelancer-card">
+      <div class="fc-header">
+        <div class="fc-avatar" style="background:#2b5c8a;">M</div>
+        <div>
+          <div class="fc-name">Marcus Chen</div>
+          <div class="fc-title">Backend Engineer</div>
+        </div>
+      </div>
+      <div class="fc-rating">
+        <span class="stars">★★★★★</span>
+        <span class="rating-num">4.9 (89 reviews)</span>
+      </div>
+      <p class="fc-bio">Building robust APIs and cloud infrastructure for startups and enterprises. 8 years scaling systems to millions of users.</p>
+      <div class="fc-tags">
+        <span class="tag">Go</span>
+        <span class="tag">Kubernetes</span>
+        <span class="tag">PostgreSQL</span>
+        <span class="tag">GCP</span>
+      </div>
+      <div class="fc-footer">
+        <div class="fc-rate">$160 <span>/ hr</span></div>
+        <button class="hire-btn" onclick="window.open('https://www.upwork.com/search/profiles/?q=backend+engineer','_blank')">View Profile</button>
+      </div>
+    </div>
+    <div class="freelancer-card">
+      <div class="fc-header">
+        <div class="fc-avatar" style="background:#7a4a8a;">P</div>
+        <div>
+          <div class="fc-name">Priya Nair</div>
+          <div class="fc-title">Brand Strategist</div>
+        </div>
+      </div>
+      <div class="fc-rating">
+        <span class="stars">★★★★★</span>
+        <span class="rating-num">5.0 (67 reviews)</span>
+      </div>
+      <p class="fc-bio">Helping challenger brands articulate who they are and why it matters. Former strategy director at two top-10 creative agencies.</p>
+      <div class="fc-tags">
+        <span class="tag">Brand Strategy</span>
+        <span class="tag">Positioning</span>
+        <span class="tag">Copywriting</span>
+      </div>
+      <div class="fc-footer">
+        <div class="fc-rate">$180 <span>/ hr</span></div>
+        <button class="hire-btn" onclick="window.open('https://www.upwork.com/search/profiles/?q=brand+strategist','_blank')">View Profile</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testimonial-section">
+  <div class="testimonial-inner">
+    <span class="quote-mark">"</span>
+    <p class="quote-text" id="quote-text">We found our entire founding design team through CRAFT. The quality of talent here is genuinely a level above anything else we tried.</p>
+    <div class="quote-author" id="quote-author">— Isabel Torres, Co-founder at Forma Studio</div>
+    <div class="quote-dots">
+      <div class="dot active" onclick="setQuote(0)"></div>
+      <div class="dot" onclick="setQuote(1)"></div>
+      <div class="dot" onclick="setQuote(2)"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <div>
+    <div class="cta-eyebrow">Ready to start?</div>
+    <h2 class="cta-title">Your next great<br>hire is <em>waiting.</em></h2>
+    <p class="cta-desc">Join over 18,000 companies who trust CRAFT to find the independent talent that drives their most important work.</p>
+    <a href="https://www.upwork.com/nx/jobs/post/" target="_blank" class="btn-primary">Post a Job — It's Free</a>
+  </div>
+  <div class="cta-right">
+    <div class="signup-title">Start freelancing today</div>
+    <div class="signup-sub">Join 42,000+ professionals</div>
+    <div class="input-row">
+      <input type="text" class="form-input" placeholder="Full name">
+      <input type="email" class="form-input" placeholder="Email address">
+      <input type="text" class="form-input" placeholder="Your main skill (e.g. UI Design)">
+    </div>
+    <button class="btn-full" onclick="window.open('https://www.upwork.com/nx/signup/?dest=freelancer','_blank')">Create Free Account →</button>
+    <div class="signup-note">No fees to join. 10% platform fee on earnings only.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <a href="https://www.upwork.com" target="_blank" class="footer-logo">CRAFT<span>.</span></a>
+      <p class="footer-tagline">Where independent professionals do their finest work. Quality over quantity, always.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Platform</div>
+      <ul class="footer-links">
+        <li><a href="https://www.upwork.com/search/profiles/" target="_blank">Browse Talent</a></li>
+        <li><a href="https://www.upwork.com/nx/jobs/post/" target="_blank">Post a Job</a></li>
+        <li><a href="https://www.upwork.com/resources/how-upwork-works" target="_blank">How it Works</a></li>
+        <li><a href="https://www.upwork.com/i/pricing/" target="_blank">Pricing</a></li>
+        <li><a href="https://www.upwork.com/enterprise/" target="_blank">Enterprise</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Community</div>
+      <ul class="footer-links">
+        <li><a href="https://earnwork.netlify.app" target="_blank">My Portfolio</a></li>
+        <li><a href="https://www.upwork.com/nx/signup/?dest=freelancer" target="_blank">Become a Freelancer</a></li>
+        <li><a href="https://www.upwork.com/resources/success-stories" target="_blank">Success Stories</a></li>
+        <li><a href="https://www.upwork.com/resources/" target="_blank">Resources</a></li>
+        <li><a href="https://www.upwork.com/blog/" target="_blank">Blog</a></li>
+        <li><a href="https://community.upwork.com/" target="_blank">Forum</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="https://www.upwork.com/about/" target="_blank">About</a></li>
+        <li><a href="https://www.upwork.com/careers/" target="_blank">Careers</a></li>
+        <li><a href="https://www.upwork.com/press/" target="_blank">Press</a></li>
+        <li><a href="https://www.upwork.com/legal/" target="_blank">Privacy</a></li>
+        <li><a href="https://www.upwork.com/legal/terms-of-service/" target="_blank">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 CRAFT Marketplace Inc. All rights reserved.</div>
+    <div class="footer-copy">Made with intention.</div>
+  </div>
+</footer>
+
+<script>
+  const quotes = [
+    {
+      text: "We found our entire founding design team through CRAFT. The quality of talent here is genuinely a level above anything else we tried.",
+      author: "— Isabel Torres, Co-founder at Forma Studio"
+    },
+    {
+      text: "Within 48 hours of posting, we had five outstanding proposals. We hired two freelancers and shipped our product three weeks ahead of schedule.",
+      author: "— Daniel Park, CTO at Lumen Labs"
+    },
+    {
+      text: "I've tripled my freelance income since joining CRAFT. The clients here actually value good work and pay accordingly.",
+      author: "— Yasmine Khalil, Motion Designer"
+    }
+  ];
+
+  let current = 0;
+
+  function setQuote(idx) {
+    current = idx;
+    document.getElementById('quote-text').textContent = quotes[idx].text;
+    document.getElementById('quote-author').textContent = quotes[idx].author;
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+  }
+
+  // Auto-rotate
+  setInterval(() => setQuote((current + 1) % quotes.length), 5000);
+</script>
+</body>
+</html>
